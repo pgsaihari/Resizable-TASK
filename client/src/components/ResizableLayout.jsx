@@ -1,5 +1,5 @@
 // src/ResizableLayout.js
-import React from 'react';
+import React, { useState } from 'react';
 import { ResizableBox } from 'react-resizable';
 import './ResizableLayout.css';
 
@@ -12,37 +12,42 @@ const ResizableComponent = ({ id, content }) => (
 
 const ResizableLayout = () => {
   const containerWidth = window.innerWidth - 20; // Adjusted for gap and borders
-  const containerHeight = window.innerHeight - 20; // Adjusted for gap and borders
+  const initialBoxWidth = Math.min(containerWidth / 3, 300);
+  const [boxWidths, setBoxWidths] = useState([initialBoxWidth, initialBoxWidth, initialBoxWidth]);
+
+  const handleResize = (index, _, { size }) => {
+    const remainingWidth = containerWidth - size.width;
+    const updatedWidths = [...boxWidths];
+    updatedWidths[index] = size.width;
+
+    // Distribute the remaining space among other resizable boxes
+    const numBoxes = updatedWidths.length;
+    const distributeWidth = remainingWidth / (numBoxes - 1);
+
+    for (let i = 0; i < numBoxes; i++) {
+      if (i !== index) {
+        updatedWidths[i] = distributeWidth;
+      }
+    }
+
+    setBoxWidths(updatedWidths);
+  };
 
   return (
     <div className="container">
-      <ResizableBox
-        width={Math.min(containerWidth / 3, 300)} // Initial width (1/3 of the container)
-        height={containerHeight}
-        maxConstraints={[containerWidth / 3, containerHeight]}
-        minConstraints={[200, containerHeight]}
-        className="resizable-box"
-      >
-        <ResizableComponent id={1} content="Some content goes here." />
-      </ResizableBox>
-      <ResizableBox
-        width={Math.min(containerWidth / 3, 300)}
-        height={containerHeight}
-        maxConstraints={[containerWidth / 3, containerHeight]}
-        minConstraints={[200, containerHeight]}
-        className="resizable-box"
-      >
-        <ResizableComponent id={2} content="Some content goes here." />
-      </ResizableBox>
-      <ResizableBox
-        width={Math.min(containerWidth / 3, 300)}
-        height={containerHeight}
-        maxConstraints={[containerWidth / 3, containerHeight]}
-        minConstraints={[200, containerHeight]}
-        className="resizable-box"
-      >
-        <ResizableComponent id={3} content="Some content goes here." />
-      </ResizableBox>
+      {[1, 2, 3].map((id, index) => (
+        <ResizableBox
+          key={id}
+          width={boxWidths[index]}
+          height={window.innerHeight - 20} // Adjusted for gap and borders
+          maxConstraints={[containerWidth / 3, window.innerHeight - 20]}
+          minConstraints={[200, window.innerHeight - 20]}
+          onResize={(e, data) => handleResize(index, e, data)}
+          className="resizable-box"
+        >
+          <ResizableComponent id={id} content="Some content goes here." />
+        </ResizableBox>
+      ))}
     </div>
   );
 };

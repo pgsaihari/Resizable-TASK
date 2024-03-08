@@ -11,7 +11,7 @@ const ResizableComponent = ({ id, content }) => (
 );
 
 const ResizableLayout = () => {
-  const containerWidth = window.innerWidth - 20; // Adjusted for gap and borders
+  const containerWidth = window.innerWidth - 1; // Adjusted for gap and borders
   const initialBoxWidth = Math.min(containerWidth / 3, 300);
   const [boxWidths, setBoxWidths] = useState([initialBoxWidth, initialBoxWidth, initialBoxWidth]);
 
